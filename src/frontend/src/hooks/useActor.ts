@@ -11,10 +11,7 @@ export function useActor() {
   const actorQuery = useQuery<backendInterface>({
     queryKey: [ACTOR_QUERY_KEY, identity?.getPrincipal().toString()],
     queryFn: async () => {
-      const isAuthenticated =
-        !!identity && !identity.getPrincipal().isAnonymous();
-
-      if (!isAuthenticated) {
+      if (!identity) {
         // Return anonymous actor if not authenticated
         return await createActorWithConfig();
       }
@@ -26,12 +23,14 @@ export function useActor() {
       };
 
       const actor = await createActorWithConfig(actorOptions);
-      // Register caller so backend assigns correct role (first user = admin)
+
+      // Register the caller so the first user becomes admin automatically
       try {
         await actor.registerCaller();
       } catch {
         // ignore if already registered
       }
+
       return actor;
     },
     // Only refetch when identity changes
