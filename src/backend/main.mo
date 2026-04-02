@@ -56,6 +56,22 @@ actor {
   let wallpapers = Map.empty<Text, Wallpaper>();
   let userProfiles = Map.empty<Principal, UserProfile>();
 
+  // Register caller: first non-anonymous caller becomes admin, rest become users
+  public shared ({ caller }) func registerCaller() : async () {
+    if (caller.isAnonymous()) { return };
+    switch (accessControlState.userRoles.get(caller)) {
+      case (?_) {}; // already registered, do nothing
+      case (null) {
+        if (not accessControlState.adminAssigned) {
+          accessControlState.userRoles.add(caller, #admin);
+          accessControlState.adminAssigned := true;
+        } else {
+          accessControlState.userRoles.add(caller, #user);
+        };
+      };
+    };
+  };
+
   // User profile management functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     userProfiles.get(caller);

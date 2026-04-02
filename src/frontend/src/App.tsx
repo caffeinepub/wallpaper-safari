@@ -32,8 +32,8 @@ export default function App() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
-  const isLoggedIn = loginStatus === "success" && !!identity;
+  const { login, clear, identity } = useInternetIdentity();
+  const isLoggedIn = !!identity && !identity.getPrincipal().isAnonymous();
 
   const { data: wallpapers = [], isLoading, isError } = useGetAllWallpapers();
   const { data: isAdmin = false } = useIsAdmin();
@@ -74,9 +74,9 @@ export default function App() {
     }
   };
 
-  const handleDownload = async (id: string, url: string) => {
+  const handleDownload = async (id: string, url: string, title: string) => {
     try {
-      await downloadWallpaper.mutateAsync({ id, url });
+      await downloadWallpaper.mutateAsync({ id, url, title });
       toast.success("Download started!");
     } catch {
       toast.error("Failed to download");

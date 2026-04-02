@@ -53,4 +53,5 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     likeWallpaper(id: string): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    _initializeAccessControlWithSecret(secret: string): Promise<void>;
 }

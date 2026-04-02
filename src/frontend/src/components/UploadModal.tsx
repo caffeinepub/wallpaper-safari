@@ -1,16 +1,9 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ExternalBlob } from "../backend";
 import { useAddWallpaper } from "../hooks/useQueries";
@@ -45,6 +38,17 @@ export default function UploadModal({ open, onClose }: UploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const addWallpaper = useAddWallpaper();
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0];
@@ -124,20 +128,40 @@ export default function UploadModal({ open, onClose }: UploadModalProps) {
 
   const openFilePicker = () => fileInputRef.current?.click();
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && handleClose()}>
-      <DialogContent
-        className="max-w-md w-[95vw] rounded-2xl"
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{
+        backgroundColor: "rgba(0,0,0,0.92)",
+        zIndex: 9999,
+      }}
+      data-ocid="upload.modal.overlay"
+    >
+      <div
+        className="relative w-full max-w-md rounded-2xl bg-background p-6 shadow-2xl"
+        style={{ zIndex: 10000 }}
         data-ocid="upload.modal"
       >
-        <DialogHeader>
-          <DialogTitle className="font-display font-semibold text-[17px]">
-            Upload Wallpaper
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">
-            Add a new wallpaper to the gallery
-          </DialogDescription>
-        </DialogHeader>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <h2 className="font-display font-semibold text-[17px] text-foreground">
+              Upload Wallpaper
+            </h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Add a new wallpaper to the gallery
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center hover:bg-muted-foreground/20 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Drop zone */}
@@ -280,7 +304,7 @@ export default function UploadModal({ open, onClose }: UploadModalProps) {
             </Button>
           </div>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }

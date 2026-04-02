@@ -70,7 +70,31 @@ export function useLikeWallpaper() {
   });
 }
 
-type DownloadVars = { id: string; url: string };
+type DownloadVars = { id: string; url: string; title?: string };
+
+async function downloadImageFile(url: string, filename: string) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = objectUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    // fallback: open in new tab
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
 
 export function useDownloadWallpaper() {
   const { actor } = useActor();
@@ -81,10 +105,11 @@ export function useDownloadWallpaper() {
     DownloadVars,
     { prev: Wallpaper[] | undefined }
   >({
-    mutationFn: async ({ id, url }: DownloadVars) => {
+    mutationFn: async ({ id, url, title }: DownloadVars) => {
       if (!actor) throw new Error("Actor not ready");
       await actor.downloadWallpaper(id);
-      window.open(url, "_blank");
+      const filename = `${title ?? "wallpaper"}.jpg`;
+      await downloadImageFile(url, filename);
     },
     onMutate: async ({ id }: DownloadVars) => {
       await queryClient.cancelQueries({ queryKey: ["wallpapers"] });

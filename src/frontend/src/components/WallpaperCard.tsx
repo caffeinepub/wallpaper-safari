@@ -8,7 +8,7 @@ interface WallpaperCardProps {
   wallpaper: Wallpaper;
   isAdmin: boolean;
   onLike: (id: string) => void;
-  onDownload: (id: string, url: string) => void;
+  onDownload: (id: string, url: string, title: string) => void;
   onDelete: (id: string) => void;
   onClick: (wallpaper: Wallpaper) => void;
   index: number;
@@ -88,7 +88,7 @@ export default function WallpaperCard({
             className="flex-1 h-8 text-xs font-medium bg-foreground text-primary-foreground hover:opacity-90 transition-opacity rounded-lg"
             onClick={(e) => {
               e.stopPropagation();
-              onDownload(wallpaper.id, imageUrl);
+              onDownload(wallpaper.id, imageUrl, wallpaper.title);
             }}
             data-ocid={`wallpaper.download_button.${ocidIndex}`}
           >
