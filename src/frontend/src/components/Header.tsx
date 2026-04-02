@@ -30,9 +30,11 @@ export default function Header({
           className="flex items-center gap-2.5 flex-shrink-0"
           data-ocid="header.link"
         >
-          <div className="w-8 h-8 rounded-md bg-foreground flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-display font-bold text-sm">W</span>
-          </div>
+          <img
+            src="/assets/generated/wallpaper-safari-logo-transparent.dim_80x80.png"
+            alt="Wallpaper Safari Logo"
+            className="w-9 h-9 object-contain"
+          />
           <span className="font-display font-bold tracking-wide text-foreground text-[17px]">
             Wallpaper Safari
           </span>

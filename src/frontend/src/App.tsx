@@ -1,17 +1,20 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Toaster } from "@/components/ui/sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { ImageOff, Loader2 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { Wallpaper } from "./backend";
+import AdminTokenDialog from "./components/AdminTokenDialog";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import HeroSection from "./components/HeroSection";
 import UploadModal from "./components/UploadModal";
 import WallpaperCard from "./components/WallpaperCard";
 import WallpaperModal from "./components/WallpaperModal";
+import { persistAdminToken } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import {
   useDeleteWallpaper,
@@ -31,9 +34,11 @@ export default function App() {
   );
   const [uploadOpen, setUploadOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
 
   const { login, clear, loginStatus, identity } = useInternetIdentity();
   const isLoggedIn = loginStatus === "success" && !!identity;
+  const queryClient = useQueryClient();
 
   const { data: wallpapers = [], isLoading, isError } = useGetAllWallpapers();
   const { data: isAdmin = false } = useIsAdmin();
@@ -107,9 +112,25 @@ export default function App() {
   const handleLogin = async () => {
     try {
       await login();
+      // Show admin token dialog after login so admin can enter their token
+      setShowAdminDialog(true);
     } catch {
       toast.error("Login failed");
     }
+  };
+
+  const handleAdminTokenConfirm = (token: string) => {
+    setShowAdminDialog(false);
+    if (token) {
+      persistAdminToken(token);
+      // Invalidate actor so it re-creates with the new token
+      queryClient.invalidateQueries({ queryKey: ["actor"] });
+      queryClient.removeQueries({ queryKey: ["actor"] });
+    }
+  };
+
+  const handleAdminTokenSkip = () => {
+    setShowAdminDialog(false);
   };
 
   const skeletonKeys = ["sk0", "sk1", "sk2", "sk3", "sk4", "sk5", "sk6", "sk7"];
@@ -301,6 +322,12 @@ export default function App() {
       {isAdmin && (
         <UploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} />
       )}
+
+      <AdminTokenDialog
+        open={showAdminDialog}
+        onConfirm={handleAdminTokenConfirm}
+        onSkip={handleAdminTokenSkip}
+      />
     </div>
   );
 }
