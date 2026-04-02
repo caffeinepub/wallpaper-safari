@@ -59,6 +59,15 @@ export default function WallpaperModal({
     };
   }, [wallpaper]);
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
   if (!wallpaper) return null;
 
   const imageUrl = wallpaper.externalBlob.getDirectURL();
@@ -105,174 +114,222 @@ export default function WallpaperModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{
-        backgroundColor: "rgba(0,0,0,0.92)",
-        zIndex: 9999,
-      }}
-      data-ocid="wallpaper.modal.overlay"
-    >
+    <>
+      {/* Backdrop */}
       <div
-        className="relative w-full max-w-3xl max-h-[90vh] rounded-2xl overflow-hidden bg-background flex flex-col md:flex-row"
+        className="fixed inset-0"
+        style={{ backgroundColor: "rgba(0,0,0,0.95)", zIndex: 9999 }}
+        data-ocid="wallpaper.modal.overlay"
+      />
+
+      {/* Modal container */}
+      <div
+        className="fixed inset-0 flex items-center justify-center p-4"
         style={{ zIndex: 10000 }}
-        data-ocid="wallpaper.modal"
       >
-        {/* Close button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute top-3 right-3 z-50 w-8 h-8 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-black/80 transition-colors"
-          data-ocid="wallpaper.modal.close_button"
+        <div
+          className="relative w-full max-w-3xl max-h-[90vh] rounded-2xl overflow-hidden flex flex-col md:flex-row"
+          style={{ backgroundColor: "#0d0d0d" }}
+          data-ocid="wallpaper.modal"
         >
-          <X className="w-4 h-4" />
-        </button>
+          {/* Close button */}
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-3 right-3 z-50 w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+            style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
+            aria-label="Close"
+            data-ocid="wallpaper.modal.close_button"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
 
-        {/* Image side */}
-        <div className="md:w-[55%] bg-black flex-shrink-0 flex items-center justify-center min-h-[200px]">
-          <img
-            src={imageUrl}
-            alt={wallpaper.title}
-            className="w-full h-full object-contain max-h-[40vh] md:max-h-[90vh]"
-          />
-        </div>
+          {/* Image side */}
+          <div
+            className="md:w-[55%] flex-shrink-0 flex items-center justify-center min-h-[200px]"
+            style={{ backgroundColor: "#000" }}
+          >
+            <img
+              src={imageUrl}
+              alt={wallpaper.title}
+              className="w-full h-full object-contain max-h-[40vh] md:max-h-[90vh]"
+            />
+          </div>
 
-        {/* Info side */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-background">
-          <div className="p-5 pb-3">
-            <div className="flex items-start justify-between gap-2">
-              <h2 className="text-lg font-semibold text-foreground leading-tight">
-                {wallpaper.title}
-              </h2>
-              <Badge variant="secondary" className="flex-shrink-0 text-xs">
-                {wallpaper.category}
-              </Badge>
+          {/* Info side */}
+          <div
+            className="flex-1 flex flex-col overflow-hidden"
+            style={{ backgroundColor: "#0d0d0d" }}
+          >
+            <div className="p-5 pb-3">
+              <div className="flex items-start justify-between gap-2 pr-8">
+                <h2 className="text-lg font-semibold leading-tight text-white">
+                  {wallpaper.title}
+                </h2>
+                <Badge
+                  variant="secondary"
+                  className="flex-shrink-0 text-xs"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.12)",
+                    color: "#e5e5e5",
+                  }}
+                >
+                  {wallpaper.category}
+                </Badge>
+              </div>
             </div>
-          </div>
 
-          <div className="px-5 pb-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
-              {formatDate(wallpaper.uploadedAt)}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Tag className="w-3.5 h-3.5" />
-              {wallpaper.category}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <HardDrive className="w-3.5 h-3.5" />
-              3840 × 2160 · 4K
-            </span>
-          </div>
-
-          <div className="px-5 pb-4 flex items-center gap-2">
-            <Button
-              onClick={handleDownload}
-              disabled={downloadWallpaper.isPending}
-              className="flex-1 h-9 text-sm font-medium bg-foreground text-primary-foreground hover:opacity-90 rounded-xl"
-              data-ocid="wallpaper.modal.download_button"
+            <div
+              className="px-5 pb-3 flex flex-wrap gap-3 text-xs"
+              style={{ color: "#aaa" }}
             >
-              <Download className="w-4 h-4 mr-1.5" />
-              {downloadWallpaper.isPending
-                ? "Downloading…"
-                : `Download (${wallpaper.downloads.toString()})`}
-            </Button>
-
-            <button
-              type="button"
-              onClick={handleLike}
-              className="flex items-center gap-1.5 px-3 h-9 rounded-xl border border-border hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 transition-colors text-sm font-medium"
-              data-ocid="wallpaper.modal.like_button"
-            >
-              <Heart className="w-4 h-4" />
-              {wallpaper.likes.toString()}
-            </button>
-          </div>
-
-          <Separator />
-
-          <ScrollArea className="flex-1 px-5 py-4 min-h-0">
-            <div className="flex items-center gap-2 mb-3">
-              <MessageCircle className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">
-                Comments ({wallpaper.comments.length})
+              <span className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5" />
+                {formatDate(wallpaper.uploadedAt)}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Tag className="w-3.5 h-3.5" />
+                {wallpaper.category}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <HardDrive className="w-3.5 h-3.5" />
+                3840 × 2160 · 4K
               </span>
             </div>
 
-            <AnimatePresence>
-              {wallpaper.comments.length === 0 ? (
-                <p
-                  className="text-xs text-muted-foreground py-2"
-                  data-ocid="wallpaper.comments.empty_state"
-                >
-                  No comments yet. Be the first!
-                </p>
-              ) : (
-                <div className="space-y-3 mb-4">
-                  {wallpaper.comments.map((comment, i) => (
-                    <motion.div
-                      key={`${comment.author}-${comment.timestamp.toString()}`}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="bg-muted rounded-xl p-3"
-                      data-ocid={`wallpaper.comment.item.${i + 1}`}
-                    >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold text-foreground">
-                          {comment.author}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground">
-                          {formatDate(comment.timestamp)}
-                        </span>
-                      </div>
-                      <p className="text-xs text-foreground/80 leading-relaxed">
-                        {comment.text}
-                      </p>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </AnimatePresence>
-
-            <form
-              onSubmit={handleSubmitComment}
-              className="space-y-2 pt-2 border-t border-border"
-            >
-              <Input
-                placeholder="Your name"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                className="h-8 text-sm"
-                data-ocid="wallpaper.comment.author_input"
-              />
-              <Textarea
-                placeholder="Add a comment…"
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="text-sm min-h-[60px] resize-none"
-                data-ocid="wallpaper.comment.textarea"
-              />
+            <div className="px-5 pb-4 flex items-center gap-2">
               <Button
-                type="submit"
-                size="sm"
-                disabled={addComment.isPending}
-                className="w-full h-8 text-xs bg-foreground text-primary-foreground hover:opacity-90"
-                data-ocid="wallpaper.comment.submit_button"
+                onClick={handleDownload}
+                disabled={downloadWallpaper.isPending}
+                className="flex-1 h-9 text-sm font-medium rounded-xl"
+                style={{ backgroundColor: "#fff", color: "#000" }}
+                data-ocid="wallpaper.modal.download_button"
               >
-                {addComment.isPending ? "Posting…" : "Post Comment"}
+                <Download className="w-4 h-4 mr-1.5" />
+                {downloadWallpaper.isPending
+                  ? "Downloading…"
+                  : `Download (${wallpaper.downloads.toString()})`}
               </Button>
-              {addComment.isError && (
-                <p
-                  className="text-xs text-destructive"
-                  data-ocid="wallpaper.comment.error_state"
+
+              <button
+                type="button"
+                onClick={handleLike}
+                className="flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-medium transition-colors"
+                style={{
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  color: "#ccc",
+                  backgroundColor: "transparent",
+                }}
+                data-ocid="wallpaper.modal.like_button"
+              >
+                <Heart className="w-4 h-4" />
+                {wallpaper.likes.toString()}
+              </button>
+            </div>
+
+            <Separator style={{ backgroundColor: "rgba(255,255,255,0.1)" }} />
+
+            <ScrollArea className="flex-1 px-5 py-4 min-h-0">
+              <div className="flex items-center gap-2 mb-3">
+                <MessageCircle className="w-4 h-4" style={{ color: "#888" }} />
+                <span className="text-sm font-semibold text-white">
+                  Comments ({wallpaper.comments.length})
+                </span>
+              </div>
+
+              <AnimatePresence>
+                {wallpaper.comments.length === 0 ? (
+                  <p
+                    className="text-xs py-2"
+                    style={{ color: "#888" }}
+                    data-ocid="wallpaper.comments.empty_state"
+                  >
+                    No comments yet. Be the first!
+                  </p>
+                ) : (
+                  <div className="space-y-3 mb-4">
+                    {wallpaper.comments.map((comment, i) => (
+                      <motion.div
+                        key={`${comment.author}-${comment.timestamp.toString()}`}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-xl p-3"
+                        style={{ backgroundColor: "rgba(255,255,255,0.07)" }}
+                        data-ocid={`wallpaper.comment.item.${i + 1}`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xs font-semibold text-white">
+                            {comment.author}
+                          </span>
+                          <span
+                            className="text-[10px]"
+                            style={{ color: "#666" }}
+                          >
+                            {formatDate(comment.timestamp)}
+                          </span>
+                        </div>
+                        <p
+                          className="text-xs leading-relaxed"
+                          style={{ color: "#ccc" }}
+                        >
+                          {comment.text}
+                        </p>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </AnimatePresence>
+
+              <form
+                onSubmit={handleSubmitComment}
+                className="space-y-2 pt-2"
+                style={{ borderTop: "1px solid rgba(255,255,255,0.1)" }}
+              >
+                <Input
+                  placeholder="Your name"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  className="h-8 text-sm text-white placeholder:text-gray-500"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                  }}
+                  data-ocid="wallpaper.comment.author_input"
+                />
+                <Textarea
+                  placeholder="Add a comment…"
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  className="text-sm min-h-[60px] resize-none text-white placeholder:text-gray-500"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                  }}
+                  data-ocid="wallpaper.comment.textarea"
+                />
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={addComment.isPending}
+                  className="w-full h-8 text-xs"
+                  style={{ backgroundColor: "#fff", color: "#000" }}
+                  data-ocid="wallpaper.comment.submit_button"
                 >
-                  Failed to post comment. Try again.
-                </p>
-              )}
-            </form>
-          </ScrollArea>
+                  {addComment.isPending ? "Posting…" : "Post Comment"}
+                </Button>
+                {addComment.isError && (
+                  <p
+                    className="text-xs text-red-400"
+                    data-ocid="wallpaper.comment.error_state"
+                  >
+                    Failed to post comment. Try again.
+                  </p>
+                )}
+              </form>
+            </ScrollArea>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
