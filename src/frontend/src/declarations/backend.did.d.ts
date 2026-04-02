@@ -58,7 +58,7 @@ export interface _SERVICE {
     _CaffeineStorageRefillResult
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
-  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'registerCaller' : ActorMethod<[], undefined>,
   'addComment' : ActorMethod<[string, string, string], undefined>,
   'addWallpaper' : ActorMethod<
     [string, string, string, ExternalBlob],

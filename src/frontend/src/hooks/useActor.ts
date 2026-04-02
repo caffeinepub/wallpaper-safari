@@ -25,12 +25,16 @@ export function useActor() {
       };
 
       const actor = await createActorWithConfig(actorOptions);
-      await actor._initializeAccessControlWithSecret("");
+      // Register the caller - first caller becomes admin automatically
+      try {
+        await actor.registerCaller();
+      } catch {
+        // Ignore errors (e.g. already registered)
+      }
       return actor;
     },
     // Only refetch when identity changes
     staleTime: Number.POSITIVE_INFINITY,
-    // This will cause the actor to be recreated when the identity changes
     enabled: true,
   });
 

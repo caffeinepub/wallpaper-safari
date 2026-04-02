@@ -70,7 +70,7 @@ export const idlService = IDL.Service({
       [],
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'registerCaller' : IDL.Func([], [], []),
   'addComment' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
   'addWallpaper' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, ExternalBlob],
@@ -159,7 +159,7 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
-    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'registerCaller' : IDL.Func([], [], []),
     'addComment' : IDL.Func([IDL.Text, IDL.Text, IDL.Text], [], []),
     'addWallpaper' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, ExternalBlob],

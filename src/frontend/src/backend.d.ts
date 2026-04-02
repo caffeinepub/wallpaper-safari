@@ -39,6 +39,7 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    registerCaller(): Promise<void>;
     addComment(id: string, author: string, text: string): Promise<void>;
     addWallpaper(id: string, title: string, category: string, externalBlob: ExternalBlob): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
