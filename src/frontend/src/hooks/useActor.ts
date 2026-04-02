@@ -11,10 +11,11 @@ export function useActor() {
   const actorQuery = useQuery<backendInterface>({
     queryKey: [ACTOR_QUERY_KEY, identity?.getPrincipal().toString()],
     queryFn: async () => {
-      const isAuthenticated = !!identity;
+      const isAuthenticated =
+        !!identity && !identity.getPrincipal().isAnonymous();
 
       if (!isAuthenticated) {
-        // Return anonymous actor if not authenticated
+        // Return anonymous actor
         return await createActorWithConfig();
       }
 
@@ -25,13 +26,12 @@ export function useActor() {
       };
 
       const actor = await createActorWithConfig(actorOptions);
-      // Register caller: first user becomes admin automatically
+      // Register caller so first user becomes admin automatically
       await actor.registerCaller();
       return actor;
     },
     // Only refetch when identity changes
     staleTime: Number.POSITIVE_INFINITY,
-    // This will cause the actor to be recreated when the identity changes
     enabled: true,
   });
 
